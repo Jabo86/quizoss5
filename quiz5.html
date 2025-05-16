@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulazione Concorso Operatore Socio Sanitario - Modulo 15</title>
+    <style>
+        /* Stesso stile CSS del Modulo 14, omesso per brevità */
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Simulazione Concorso Operatore Socio Sanitario - Modulo 15</h1>
+        <div class="question-nav" id="questionNav"></div>
+        <div id="timer">Tempo rimanente: <span id="time">30:00</span></div>
+        <div id="quiz"></div>
+        <div class="navigation">
+            <button class="nav-button" id="prev" disabled>⬅ Indietro</button>
+            <button class="nav-button" id="next">Avanti ➡</button>
+        </div>
+        <button id="submit">Invia Risposte</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Array di domande (421-450) simulate, in attesa di conferma dalla banca dati
+        const questions = [
+            {
+                question: "La gestione del paziente con rischio di infezione include:",
+                options: [
+                    "uso di dispositivi di protezione individuale",
+                    "accesso libero per i visitatori",
+                    "nessuna precauzione specifica"
+                ],
+                correct: "uso di dispositivi di protezione individuale",
+                explanation: "Il rischio di infezione richiede l’uso di DPI (es. guanti, mascherine) e precauzioni standard (es. lavaggio mani). L’OSS deve seguire i protocolli, limitare gli accessi, e segnalare all’infermiere segni di infezione."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di infezione sistemica?",
+                options: [
+                    "cute asciutta",
+                    "febbre e brividi",
+                    "diuresi regolare"
+                ],
+                correct: "febbre e brividi",
+                explanation: "Febbre e brividi sono segni di infezione sistemica (es. sepsi). L’OSS deve monitorare i parametri vitali, annotare sintomi, e segnalare all’infermiere per una valutazione medica."
+            },
+            {
+                question: "La gestione del paziente con catetere vescicale include:",
+                options: [
+                    "mantenimento del sistema chiuso",
+                    "irrigazione con acqua bollente",
+                    "rimozione quotidiana"
+                ],
+                correct: "mantenimento del sistema chiuso",
+                explanation: "Il catetere vescicale richiede un sistema chiuso per prevenire infezioni. L’OSS deve svuotare la sacca con tecnica asettica, monitorare la diuresi, e segnalare all’infermiere segni di infezione."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di infezione da catetere vescicale?",
+                options: [
+                    "urina torbida e febbre",
+                    "urina chiara",
+                    "diuresi abbondante"
+                ],
+                correct: "urina torbida e febbre",
+                explanation: "Urina torbida e febbre indicano un’infezione da catetere. L’OSS deve annotare le caratteristiche dell’urina, usare DPI, e segnalare all’infermiere per una valutazione medica."
+            },
+            {
+                question: "La gestione del paziente con stomia intestinale include:",
+                options: [
+                    "cambio regolare del sacchetto",
+                    "lavaggio con alcool",
+                    "rimozione della stomia"
+                ],
+                correct: "cambio regolare del sacchetto",
+                explanation: "La stomia intestinale richiede cambio regolare del sacchetto e igiene della cute peristomale. L’OSS deve monitorare l’output, prevenire irritazioni, e segnalare all’infermiere anomalie."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di complicanza da stomia intestinale?",
+                options: [
+                    "sanguinamento peristomale",
+                    "output normale",
+                    "cute asciutta"
+                ],
+                correct: "sanguinamento peristomale",
+                explanation: "Sanguinamento peristomale indica una complicanza (es. infezione). L’OSS deve eseguire una pulizia accurata, monitorare la stomia, e segnalare all’infermiere per una valutazione."
+            },
+            {
+                question: "La gestione del paziente con ferita chirurgica include:",
+                options: [
+                    "monitoraggio della ferita",
+                    "rimozione dei punti",
+                    "lavaggio con alcool"
+                ],
+                correct: "monitoraggio della ferita",
+                explanation: "L’OSS monitora la ferita chirurgica per arrossamenti o secrezioni, usando tecnica asettica. La rimozione dei punti è di competenza medica. Segnalare all’infermiere anomalie."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di infezione da ferita chirurgica?",
+                options: [
+                    "arrossamento e calore",
+                    "cute integra",
+                    "riduzione del gonfiore"
+                ],
+                correct: "arrossamento e calore",
+                explanation: "Arrossamento e calore indicano un’infezione da ferita. L’OSS deve monitorare la ferita, usare DPI, e segnalare all’infermiere per una valutazione medica."
+            },
+            {
+                question: "La gestione del paziente con drenaggio chirurgico include:",
+                options: [
+                    "monitoraggio del drenaggio",
+                    "irrigazione con acqua",
+                    "rimozione senza prescrizione"
+                ],
+                correct: "monitoraggio del drenaggio",
+                explanation: "L’OSS monitora il drenaggio (es. quantità, colore), svuota il serbatoio con tecnica asettica, e segnala all’infermiere anomalie come secrezioni purulente."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di complicanza da drenaggio chirurgico?",
+                options: [
+                    "secrezioni purulente",
+                    "drenaggio chiaro",
+                    "assenza di output"
+                ],
+                correct: "secrezioni purulente",
+                explanation: "Secrezioni purulente indicano un’infezione al sito del drenaggio. L’OSS deve monitorare il sito, usare tecnica asettica, e segnalare all’infermiere per una valutazione."
+            },
+            {
+                question: "La gestione del paziente con tracheostomia include:",
+                options: [
+                    "aspirazione asettica delle secrezioni",
+                    "irrigazione con acqua",
+                    "rimozione quotidiana"
+                ],
+                correct: "aspirazione asettica delle secrezioni",
+                explanation: "La tracheostomia richiede aspirazione delle secrezioni con tecnica asettica. L’OSS deve usare DPI, monitorare la respirazione, e segnalare all’infermiere segni di infezione."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di complicanza da tracheostomia?",
+                options: [
+                    "secrezioni purulente",
+                    "respirazione regolare",
+                    "cute asciutta"
+                ],
+                correct: "secrezioni purulente",
+                explanation: "Secrezioni purulente indicano una complicanza da tracheostomia. L’OSS deve monitorare la tracheostomia, eseguire aspirazioni asettiche, e segnalare all’infermiere."
+            },
+            {
+                question: "La gestione del paziente con ossigenoterapia include:",
+                options: [
+                    "monitoraggio della saturazione",
+                    "rimozione della cannula",
+                    "ossigeno senza prescrizione"
+                ],
+                correct: "monitoraggio della saturazione",
+                explanation: "L’ossigenoterapia richiede monitoraggio della saturazione con saturimetro. L’OSS deve verificare il flusso, garantire comfort, e segnalare all’infermiere valori bassi."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di ipossia?",
+                options: [
+                    "cianosi e confusione",
+                    "saturazione al 98%",
+                    "respirazione regolare"
+                ],
+                correct: "cianosi e confusione",
+                explanation: "Cianosi e confusione sono segni di ipossia. L’OSS deve monitorare la saturazione, somministrare ossigeno se prescritto, e segnalare all’infermiere sintomi gravi."
+            },
+            {
+                question: "La gestione del paziente con sondino nasogastrico include:",
+                options: [
+                    "verifica della posizione",
+                    "irrigazione con acqua bollente",
+                    "rimozione quotidiana"
+                ],
+                correct: "verifica della posizione",
+                explanation: "Il sondino nasogastrico richiede verifica della posizione (es. aspirazione di contenuto gastrico). L’OSS deve monitorare la tolleranza, segnalare all’infermiere reflusso o ostruzioni."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di intolleranza al sondino nasogastrico?",
+                options: [
+                    "nausea e vomito",
+                    "respirazione regolare",
+                    "cute asciutta"
+                ],
+                correct: "nausea e vomito",
+                explanation: "Nausea e vomito indicano intolleranza al sondino nasogastrico. L’OSS deve monitorare i sintomi, mantenere il paziente in posizione corretta, e segnalare all’infermiere."
+            },
+            {
+                question: "La gestione del paziente con deambulatore include:",
+                options: [
+                    "controllo dell’altezza",
+                    "uso senza regolazioni",
+                    "rimozione notturna"
+                ],
+                correct: "controllo dell’altezza",
+                explanation: "Il deambulatore deve essere regolato (es. altezza ascellare corretta). L’OSS assiste il paziente, monitora la postura, e segnalare all’infermiere difficoltà o rischi di caduta."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di rischio di caduta?",
+                options: [
+                    "instabilità e ricerca di appoggi",
+                    "andatura stabile",
+                    "respirazione regolare"
+                ],
+                correct: "instabilità e ricerca di appoggi",
+                explanation: "Instabilità e ricerca di appoggi indicano rischio di caduta. L’OSS deve fornire supporto, garantire un ambiente sicuro, e segnalare all’infermiere episodi di instabilità."
+            },
+            {
+                question: "La prevenzione delle cadute include:",
+                options: [
+                    "illuminazione adeguata",
+                    "pavimento bagnato",
+                    "calzature scivolose"
+                ],
+                correct: "illuminazione adeguata",
+                explanation: "La prevenzione delle cadute richiede illuminazione adeguata e rimozione di ostacoli. L’OSS deve controllare l’ambiente, assistere il paziente, e segnalare all’infermiere rischi ambientali."
+            },
+            {
+                question: "La gestione del paziente con protesi d’arto include:",
+                options: [
+                    "controllo della cute",
+                    "lavaggio con alcool",
+                    "rimozione durante l’igiene"
+                ],
+                correct: "controllo della cute",
+                explanation: "L’OSS controlla la cute per irritazioni, assiste nell’applicazione della protesi, e garantisce comfort. Segnalare all’infermiere arrossamenti o difficoltà."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di irritazione da protesi?",
+                options: [
+                    "arrossamento e dolore",
+                    "cute liscia",
+                    "mobilità aumentata"
+                ],
+                correct: "arrossamento e dolore",
+                explanation: "Arrossamento e dolore indicano irritazione da protesi. L’OSS deve monitorare la cute, evitare pressioni, e segnalare all’infermiere per una valutazione."
+            },
+            {
+                question: "La gestione del paziente con gesso include:",
+                options: [
+                    "controllo della circolazione",
+                    "immersione in acqua",
+                    "rimozione per l’igiene"
+                ],
+                correct: "controllo della circolazione",
+                explanation: "L’OSS controlla la circolazione distale (es. colore, temperatura) e segnala edema o dolore. Il gesso non va immerso né rimosso. Segnalare all’infermiere sintomi come formicolio."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di complicanza da gesso?",
+                options: [
+                    "formicolio e gonfiore",
+                    "cute calda",
+                    "mobilità normale"
+                ],
+                correct: "formicolio e gonfiore",
+                explanation: "Formicolio e gonfiore distale indicano una complicanza da gesso. L’OSS deve monitorare la parte immobilizzata, mantenere il gesso asciutto, e segnalare all’infermiere."
+            },
+            {
+                question: "La gestione del paziente con bendaggio elastico include:",
+                options: [
+                    "controllo della circolazione",
+                    "applicazione stretta",
+                    "lavaggio con sapone"
+                ],
+                correct: "controllo della circolazione",
+                explanation: "L’OSS controlla la circolazione (es. colorito, temperatura) e rimuove il bendaggio se indicato. Un’applicazione troppo stretta può causare ischemia. Segnalare all’infermiere sintomi come dolore."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di compressione da bendaggio?",
+                options: [
+                    "cianosi e dolore",
+                    "cute rosea",
+                    "mobilità completa"
+                ],
+                correct: "cianosi e dolore",
+                explanation: "Cianosi e dolore indicano compressione da bendaggio. L’OSS deve monitorare la parte bendata, allentare se necessario, e segnalare all’infermiere per una gestione immediata."
+            },
+            {
+                question: "La gestione del paziente con piaghe da decubito include:",
+                options: [
+                    "cambi posturali regolari",
+                    "massaggi con alcool",
+                    "mantenimento della posizione supina"
+                ],
+                correct: "cambi posturali regolari",
+                explanation: "I cambi posturali ogni 2-3 ore prevengono e gestiscono le piaghe da decubito. L’OSS deve mantenere la cute pulita, usare presidi antidecubito, e segnalare all’infermiere lesioni."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di piaga da decubito iniziale?",
+                options: [
+                    "cute arrossata non sbiancante",
+                    "cute liscia",
+                    "cute fredda"
+                ],
+                correct: "cute arrossata non sbiancante",
+                explanation: "L’arrossamento non sbiancante è un segno di piaga da decubito di primo stadio. L’OSS deve eseguire cambi posturali, monitorare la cute, e segnalare all’infermiere per prevenire la progressione."
+            },
+            {
+                question: "La gestione del paziente con incontinenza fecale include:",
+                options: [
+                    "igiene perineale regolare",
+                    "detergenti aggressivi",
+                    "riduzione dell’idratazione"
+                ],
+                correct: "igiene perineale regolare",
+                explanation: "L’incontinenza fecale richiede igiene perineale regolare per prevenire irritazioni. L’OSS deve cambiare i dispositivi assorbenti, monitorare la cute, e segnalare all’infermiere segni di infezione."
+            },
+            {
+                question: "Quale tra i seguenti è un segno di infezione cutanea?",
+                options: [
+                    "arrossamento e secrezioni",
+                    "cute liscia",
+                    "cute fredda"
+                ],
+                correct: "arrossamento e secrezioni",
+                explanation: "Arrossamento e secrezioni indicano un’infezione cutanea. L’OSS deve monitorare la cute, usare DPI, e segnalare all’infermiere sintomi per una valutazione medica."
+            },
+            {
+                question: "La gestione del paziente con febbre include:",
+                options: [
+                    "monitoraggio della temperatura",
+                    "coprire con coperte pesanti",
+                    "somministrazione di antipiretici"
+                ],
+                correct: "monitoraggio della temperatura",
+                explanation: "La febbre richiede monitoraggio della temperatura (es. ogni 4 ore) e idratazione. L’OSS deve misurare la temperatura, offrire liquidi, e segnalare all’infermiere valori elevati."
+            }
+        ];
+
+        let currentQuestion = 0;
+
+        // Carica i quadratini di navigazione
+        function loadQuestionNav() {
+            const navDiv = document.getElementById("questionNav");
+            questions.forEach((_, index) => {
+                const box = document.createElement("div");
+                box.classList.add("question-box");
+                box.textContent = index + 1;
+                box.addEventListener("click", () => {
+                    showQuestion(index);
+                });
+                navDiv.appendChild(box);
+            });
+        }
+
+        // Carica il quiz
+        function loadQuiz() {
+            const quizDiv = document.getElementById("quiz");
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question");
+                questionDiv.id = `question-${index}`;
+                questionDiv.innerHTML = `
+                    <h3>${index + 421}. ${q.question}</h3>
+                    ${q.options.map((opt, i) => `
+                        <div class="option" data-value="${opt}">
+                            <input type="radio" name="q${index}" value="${opt}" id="q${index}_${i}">
+                            <label for="q${index}_${i}">${opt}</label>
+                            <span class="lamp" id="lamp-${index}-${i}">💡</span>
+                        </div>
+                    `).join("")}
+                    <div class="explanation" id="exp-${index}">${q.explanation}</div>
+                `;
+                quizDiv.appendChild(questionDiv);
+
+                const radios = questionDiv.querySelectorAll(`input[name="q${index}"]`);
+                radios.forEach(radio => {
+                    radio.addEventListener("change", () => {
+                        document.querySelectorAll(".question-box")[index].classList.add("answered");
+                    });
+                });
+            });
+            showQuestion(0);
+        }
+
+        // Mostra la domanda corrente
+        function showQuestion(index) {
+            document.querySelectorAll(".question").forEach(q => q.classList.remove("active"));
+            document.getElementById(`question-${index}`).classList.add("active");
+            currentQuestion = index;
+            document.getElementById("prev").disabled = currentQuestion === 0;
+            document.getElementById("next").disabled = currentQuestion === questions.length - 1;
+        }
+
+        // Timer (30 minuti)
+        let timeLeft = 30 * 60;
+        function startTimer() {
+            const timer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById("time").textContent = 
+                    `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    checkAnswers();
+                }
+            }, 1000);
+        }
+
+        // Controllo risposte e feedback visivo
+        function checkAnswers() {
+            let score = 0;
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const options = document.querySelectorAll(`#question-${index} .option`);
+                options.forEach(option => {
+                    const value = option.getAttribute("data-value");
+                    if (value === q.correct) {
+                        option.classList.add("correct");
+                        const lamp = option.querySelector(".lamp");
+                        lamp.style.display = "inline";
+                        lamp.addEventListener("click", () => {
+                            const explanation = document.getElementById(`exp-${index}`);
+                            explanation.style.display = "block";
+                        });
+                    }
+                });
+                if (selected) {
+                    if (selected.value === q.correct) {
+                        score++;
+                    } else {
+                        selected.parentElement.classList.add("wrong");
+                    }
+                }
+            });
+            const resultDiv = document.getElementById("result");
+            resultDiv.textContent = `Punteggio: ${score} / ${questions.length}`;
+            document.getElementById("submit").disabled = true;
+            document.getElementById("prev").disabled = true;
+            document.getElementById("next").disabled = true;
+            document.querySelectorAll("input[type=radio]").forEach(radio => {
+                radio.disabled = true;
+            });
+        }
+
+        // Inizializzazione
+        window.onload = () => {
+            loadQuestionNav();
+            loadQuiz();
+            startTimer();
+            document.getElementById("prev").addEventListener("click", () => {
+                if (currentQuestion > 0) showQuestion(currentQuestion - 1);
+            });
+            document.getElementById("next").addEventListener("click", () => {
+                if (currentQuestion < questions.length - 1) showQuestion(currentQuestion + 1);
+            });
+            document.getElementById("submit").addEventListener("click", () => {
+                if (confirm("Sei sicuro di voler inviare le risposte?")) {
+                    checkAnswers();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
